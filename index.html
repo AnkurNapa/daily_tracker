@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Progress Tracker - Ankur Napa</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #4a69bd 50%, #8e44ad 100%);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.2rem;
+            border-radius: 25px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab-content {
+            padding: 2rem;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .file-upload {
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            background: #f8f9ff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload:hover {
+            background: #f0f4ff;
+            border-color: #4a69bd;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 2rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .data-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+        }
+
+        .data-table tr:hover {
+            background: #f8f9ff;
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #2c3e50 0%, #4a69bd 50%, #8e44ad 100%);
+            color: white;
+            padding: 3rem 2rem 2rem;
+            margin-top: 3rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .footer-title {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            color: #74b9ff;
+        }
+
+        .footer-subtitle {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .footer-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .footer-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            text-decoration: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .footer-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .footer-about {
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            font-size: 1rem;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        .footer-contact {
+            font-style: italic;
+            margin-bottom: 1rem;
+        }
+
+        .whatsapp-float {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #25D366;
+            color: white;
+            border-radius: 50px;
+            padding: 1rem;
+            box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+            cursor: pointer;
+            z-index: 1000;
+            animation: pulse 2s infinite;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4); }
+            50% { box-shadow: 0 4px 30px rgba(37, 211, 102, 0.7); }
+            100% { box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4); }
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .nav-buttons, .footer-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                📊 Daily Progress Tracker
+            </div>
+            <div class="nav-buttons">
+                <a href="https://www.linkedin.com/in/ankur-napa/" target="_blank" class="nav-btn">
+                    🔗 Connect on LinkedIn
+                </a>
+                <a href="https://wa.me/917755909445" target="_blank" class="nav-btn">
+                    📱 WhatsApp
+                </a>
+                <a href="https://nas.io/craftbeer" target="_blank" class="nav-btn">
+                    🎓 Join My Craft Beer School
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <div class="main-content">
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('entry')">📝 Data Entry</button>
+                <button class="tab" onclick="showTab('charts')">📊 Charts & Analytics</button>
+                <button class="tab" onclick="showTab('data')">📋 Manage Data</button>
+                <button class="tab" onclick="showTab('import')">📁 Import/Export</button>
+            </div>
+
+            <!-- Data Entry Tab -->
+            <div id="entry" class="tab-content active">
+                <h2>📝 Daily Entry</h2>
+                <form id="dataForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="date">Date</label>
+                            <input type="date" id="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="grade">Grade/Score</label>
+                            <input type="number" id="grade" step="0.1" placeholder="e.g., 85.5" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="temperature">Temperature (°C)</label>
+                            <input type="number" id="temperature" step="0.1" placeholder="e.g., 36.5">
+                        </div>
+                        <div class="form-group">
+                            <label for="notes">Notes (Optional)</label>
+                            <input type="text" id="notes" placeholder="Any additional notes...">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">💾 Save Entry</button>
+                    <button type="button" class="btn btn-secondary" onclick="clearForm()">🔄 Clear</button>
+                </form>
+
+                <!-- Quick Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalEntries">0</div>
+                        <div class="stat-label">Total Entries</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgGrade">0</div>
+                        <div class="stat-label">Average Grade</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="currentStreak">0</div>
+                        <div class="stat-label">Current Streak</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="lastEntry">Never</div>
+                        <div class="stat-label">Last Entry</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Tab -->
+            <div id="charts" class="tab-content">
+                <h2>📊 Charts & Analytics</h2>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="chartType">Chart Type</label>
+                        <select id="chartType" onchange="updateChart()">
+                            <option value="line">Line Chart</option>
+                            <option value="bar">Bar Chart</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="dateRange">Date Range</label>
+                        <select id="dateRange" onchange="updateChart()">
+                            <option value="7">Last 7 days</option>
+                            <option value="30">Last 30 days</option>
+                            <option value="90">Last 90 days</option>
+                            <option value="all">All time</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="progressChart"></canvas>
+                </div>
+
+                <div class="form-group">
+                    <button class="btn" onclick="shareToWhatsApp()">📱 Share to WhatsApp</button>
+                    <button class="btn btn-secondary" onclick="downloadChart()">📸 Download Chart</button>
+                </div>
+            </div>
+
+            <!-- Data Management Tab -->
+            <div id="data" class="tab-content">
+                <h2>📋 Manage Data</h2>
+                
+                <div class="form-group">
+                    <button class="btn btn-danger" onclick="clearAllData()">🗑️ Clear All Data</button>
+                    <button class="btn btn-secondary" onclick="exportData()">📤 Export to CSV</button>
+                </div>
+
+                <div id="dataTableContainer">
+                    <table class="data-table" id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Grade</th>
+                                <th>Temperature</th>
+                                <th>Notes</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Import/Export Tab -->
+            <div id="import" class="tab-content">
+                <h2>📁 Import/Export Data</h2>
+                
+                <div class="file-upload" onclick="document.getElementById('csvFile').click()">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📁</div>
+                    <h3>Click to Import CSV File</h3>
+                    <p>Upload your daily tracking data in CSV format</p>
+                    <input type="file" id="csvFile" accept=".csv" style="display: none;" onchange="importCSV(event)">
+                </div>
+
+                <div class="form-group" style="margin-top: 2rem;">
+                    <h3>CSV Format Guide</h3>
+                    <p>Your CSV should have these columns: Date, Grade, Temperature, Notes</p>
+                    <p>Example: 2024-01-15,85.5,36.8,Good progress today</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <h2 class="footer-title">Connect with Ankur Napa</h2>
+            <p class="footer-subtitle">Progress Tracking Expert & Data Visualization Specialist</p>
+            
+            <div class="footer-buttons">
+                <a href="https://www.linkedin.com/in/ankur-napa/" target="_blank" class="footer-btn">
+                    🔗 LinkedIn Profile
+                </a>
+                <a href="https://wa.me/917755909445" target="_blank" class="footer-btn">
+                    📱 WhatsApp Consultation
+                </a>
+                <a href="https://nas.io/craftbeer" target="_blank" class="footer-btn">
+                    🎓 Online Craft Beer School
+                </a>
+            </div>
+
+            <div class="footer-about">
+                <strong>About the Tracker:</strong> This professional progress tracker is based on data visualization best practices and proven tracking methodologies. Perfect for students, professionals, and anyone serious about measuring daily improvements.
+            </div>
+
+            <div class="footer-contact">
+                Need help with progress tracking or want to learn data visualization? Contact me through the links above!
+            </div>
+
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.2); opacity: 0.8;">
+                Created by Ankur Napa | WhatsApp: +91-7755909445 | All data stays on your device
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating WhatsApp Button -->
+    <a href="https://wa.me/917755909445" target="_blank" class="whatsapp-float">
+        📱 <span style="margin-left: 0.5rem;">Chat</span>
+    </a>
+
+    <script>
+        // Initialize the app
+        let progressData = [];
+        let chart = null;
+
+        // Load data from localStorage on page load
+        window.onload = function() {
+            loadData();
+            updateStats();
+            updateDataTable();
+            updateChart();
+            document.getElementById('date').value = new Date().toISOString().split('T')[0];
+        };
+
+        // Tab switching functionality
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+            
+            // Update chart if charts tab is selected
+            if (tabName === 'charts') {
+                setTimeout(updateChart, 100);
+            }
+        }
+
+        // Load data from localStorage
+        function loadData() {
+            const stored = localStorage.getItem('dailyProgressData');
+            if (stored) {
+                progressData = JSON.parse(stored);
+            }
+        }
+
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('dailyProgressData', JSON.stringify(progressData));
+        }
+
+        // Form submission
+        document.getElementById('dataForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const date = document.getElementById('date').value;
+            const grade = parseFloat(document.getElementById('grade').value);
+            const temperature = parseFloat(document.getElementById('temperature').value) || null;
+            const notes = document.getElementById('notes').value;
+
+            // Check if entry for this date already exists
+            const existingIndex = progressData.findIndex(item => item.date === date);
+            
+            const entry = { date, grade, temperature, notes };
+            
+            if (existingIndex >= 0) {
+                progressData[existingIndex] = entry;
+                showAlert('Entry updated successfully!', 'success');
+            } else {
+                progressData.push(entry);
+                showAlert('Entry added successfully!', 'success');
+            }
+            
+            // Sort by date
+            progressData.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            saveData();
+            updateStats();
+            updateDataTable();
+            updateChart();
+            clearForm();
+        });
+
+        // Clear form
+        function clearForm() {
+            document.getElementById('dataForm').reset();
+            document.getElementById('date').value = new Date().toISOString().split('T')[0];
+        }
+
+        // Update statistics
+        function updateStats() {
+            const total = progressData.length;
+            const avgGrade = total > 0 ? (progressData.reduce((sum, item) => sum + item.grade, 0) / total).toFixed(1) : 0;
+            const lastEntry = total > 0 ? progressData[total - 1].date : 'Never';
+            
+            // Calculate streak
+            let streak = 0;
+            const today = new Date();
+            const dates = progressData.map(item => new Date(item.date)).sort((a, b) => b - a);
+            
+            for (let i = 0; i < dates.length; i++) {
+                const daysDiff = Math.floor((today - dates[i]) / (1000 * 60 * 60 * 24));
+                if (daysDiff === i) {
+                    streak++;
+                } else {
+                    break;
+                }
+            }
+
+            document.getElementById('totalEntries').textContent = total;
+            document.getElementById('avgGrade').textContent = avgGrade;
+            document.getElementById('currentStreak').textContent = streak;
+            document.getElementById('lastEntry').textContent = lastEntry;
+        }
+
+        // Update data table
+        function updateDataTable() {
+            const tbody = document.getElementById('dataTableBody');
+            tbody.innerHTML = '';
+            
+            progressData.slice().reverse().forEach((item, index) => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${item.date}</td>
+                    <td>${item.grade}</td>
+                    <td>${item.temperature || 'N/A'}</td>
+                    <td>${item.notes || ''}</td>
+                    <td>
+                        <button class="btn btn-danger" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="deleteEntry('${item.date}')">🗑️</button>
+                    </td>
+                `;
+            });
+        }
+
+        // Delete entry
+        function deleteEntry(date) {
+            if (confirm('Are you sure you want to delete this entry?')) {
+                progressData = progressData.filter(item => item.date !== date);
+                saveData();
+                updateStats();
+                updateDataTable();
+                updateChart();
+                showAlert('Entry deleted successfully!', 'success');
+            }
+        }
+
+        // Clear all data
+        function clearAllData() {
+            if (confirm('Are you sure you want to delete ALL data? This cannot be undone!')) {
+                progressData = [];
+                saveData();
+                updateStats();
+                updateDataTable();
+                updateChart();
+                showAlert('All data cleared!', 'success');
+            }
+        }
+
+        // Update chart
+        function updateChart() {
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            const chartType = document.getElementById('chartType').value;
+            const dateRange = parseInt(document.getElementById('dateRange').value);
+            
+            let filteredData = progressData;
+            if (dateRange !== 'all') {
+                const cutoffDate = new Date();
+                cutoffDate.setDate(cutoffDate.getDate() - dateRange);
+                filteredData = progressData.filter(item => new Date(item.date) >= cutoffDate);
+            }
+
+            const labels = filteredData.map(item => item.date);
+            const grades = filteredData.map(item => item.grade);
+            const temperatures = filteredData.map(item => item.temperature).filter(t => t !== null);
+
+            // Calculate moving averages
+            const movingAvg = [];
+            for (let i = 0; i < grades.length; i++) {
+                const start = Math.max(0, i - 6);
+                const slice = grades.slice(start, i + 1);
+                movingAvg.push(slice.reduce((a, b) => a + b, 0) / slice.length);
+            }
+
+            if (chart) {
+                chart.destroy();
+            }
+
+            chart = new Chart(ctx, {
+                type: chartType,
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Grade/Score',
+                            data: grades,
+                            borderColor: '#667eea',
+                            backgroundColor: chartType === 'bar' ? 'rgba(102, 126, 234, 0.8)' : 'rgba(102, 126, 234, 0.1)',
+                            borderWidth: 2,
+                            fill: chartType === 'line',
+                            tension: 0.4
+                        },
+                        {
+                            label: '7-Day Moving Average',
+                            data: movingAvg,
+                            borderColor: '#764ba2',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0.4,
+                            type: 'line'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: {
+                                color: 'rgba(0,0,0,0.1)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(0,0,0,0.1)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Daily Progress Tracking'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Share to WhatsApp
+        function shareToWhatsApp() {
+            if (progressData.length === 0) {
+                showAlert('No data to share! Please add some entries first.', 'error');
+                return;
+            }
+
+            const latest = progressData[progressData.length - 1];
+            const avgGrade = (progressData.reduce((sum, item) => sum + item.grade, 0) / progressData.length).toFixed(1);
+            const trend = progressData.length > 1 ? 
+                (latest.grade > progressData[progressData.length - 2].grade ? 'Improving 📈' : 
+                 latest.grade < progressData[progressData.length - 2].grade ? 'Declining 📉' : 'Stable ➡️') : 'New Start 🚀';
+
+            const message = `📊 My Daily Progress Report
+
+📅 Latest Entry: ${latest.date}
+🎯 Latest Score: ${latest.grade}
+📈 Average Score: ${avgGrade}
+📊 Trend: ${trend}
+📝 Total Entries: ${progressData.length}
+
+Need help with data analysis?
+Contact Ankur Napa: +91-7755909445
+
+#ProgressTracking #DataVisualization
+Created with Ankur Napa's Progress Tracker`;
+
+            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        // Download chart (simplified version)
+        function downloadChart() {
+            if (chart) {
+                const link = document.createElement('a');
+                link.download = 'progress-chart.png';
+                link.href = chart.toBase64Image();
+                link.click();
+            }
+        }
+
+        // Export data to CSV
+        function exportData() {
+            if (progressData.length === 0) {
+                showAlert('No data to export!', 'error');
+                return;
+            }
+
+            const headers = ['Date', 'Grade', 'Temperature', 'Notes'];
+            const csvContent = [
+                headers.join(','),
+                ...progressData.map(item => [
+                    item.date,
+                    item.grade,
+                    item.temperature || '',
+                    `"${item.notes || ''}"`
+                ].join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `progress-data-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            showAlert('Data exported successfully!', 'success');
+        }
+
+        // Import CSV
+        function importCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const csv = e.target.result;
+                    const lines = csv.split('\n');
+                    const headers = lines[0].split(',');
+                    
+                    // Validate headers
+                    if (!headers.includes('Date') || !headers.includes('Grade')) {
+                        showAlert('CSV must contain Date and Grade columns!', 'error');
+                        return;
+                    }
+
+                    const newData = [];
+                    for (let i = 1; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        if (!line) continue;
+                        
+                        const values = line.split(',');
+                        const entry = {
+                            date: values[0],
+                            grade: parseFloat(values[1]),
+                            temperature: values[2] ? parseFloat(values[2]) : null,
+                            notes: values[3] ? values[3].replace(/"/g, '') : ''
+                        };
+                        
+                        if (entry.date && !isNaN(entry.grade)) {
+                            newData.push(entry);
+                        }
+                    }
+
+                    if (newData.length > 0) {
+                        // Merge with existing data
+                        newData.forEach(newEntry => {
+                            const existingIndex = progressData.findIndex(item => item.date === newEntry.date);
+                            if (existingIndex >= 0) {
+                                progressData[existingIndex] = newEntry;
+                            } else {
+                                progressData.push(newEntry);
+                            }
+                        });
+                        
+                        progressData.sort((a, b) => new Date(a.date) - new Date(b.date));
+                        saveData();
+                        updateStats();
+                        updateDataTable();
+                        updateChart();
+                        showAlert(`Successfully imported ${newData.length} entries!`, 'success');
+                    } else {
+                        showAlert('No valid data found in CSV!', 'error');
+                    }
+                } catch (error) {
+                    showAlert('Error parsing CSV file!', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Show alert messages
+        function showAlert(message, type) {
+            // Remove existing alerts
+            const existingAlerts = document.querySelectorAll('.alert');
+            existingAlerts.forEach(alert => alert.remove());
+
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            
+            // Insert after the active tab content
+            const activeTab = document.querySelector('.tab-content.active');
+            activeTab.insertBefore(alert, activeTab.firstChild);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+
+        // Make tab buttons work properly
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('.tab');
+            tabButtons.forEach((button, index) => {
+                button.addEventListener('click', function() {
+                    const tabNames = ['entry', 'charts', 'data', 'import'];
+                    showTab(tabNames[index]);
+                });
+            });
+        });
+
+        // Fix tab switching function
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to correct tab based on tabName
+            const tabIndex = ['entry', 'charts', 'data', 'import'].indexOf(tabName);
+            if (tabIndex >= 0) {
+                tabs[tabIndex].classList.add('active');
+            }
+            
+            // Update chart if charts tab is selected
+            if (tabName === 'charts') {
+                setTimeout(updateChart, 100);
+            }
+        }
+    </script>
+</body>
+</html>
